@@ -9,7 +9,46 @@
  */
 class InputfieldHelper extends WireData implements Module, ConfigurableModule {
 
+    /**
+     * Inputfield Name Prefix
+     *
+     * @var string
+     */
+    public $name_prefix = "";
+
+    /**
+     * Inputfield Name Suffix
+     *
+     * @var string
+     */
+    public $name_suffix = "";
+
+    /**
+     * Inputfield ID Prefix
+     *
+     * @var string
+     */
+    public $id_prefix = "";
+
+    /**
+     * Inputfield ID Suffix
+     *
+     * @var string
+     */
+    public $id_suffix = "";
+
+    /**
+     * Module Configs
+     *
+     * @var array
+     */
     protected $configs = array();
+
+    /**
+     * Module Configs Defaults
+     *
+     * @var array
+     */
     protected $defaults = array();
 
     /**
@@ -127,13 +166,13 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
             foreach ($fields as $key => $inputfield) {
                 if(is_array($inputfield)) {
                     $type = $this->element('type', $inputfield);
-                    $children = $this->element('fields', $inputfield);
+                    $children = $this->element('fields', $inputfield, array());
 
                     $build = true;
                     if(array_key_exists('build', $inputfield)) $build = $inputfield['build'];
                     if($build === true) {
                         $element = null;
-                        if($type == 'InputfieldFieldset' && count($children)) {
+                        if(($type == 'fieldset' || $type == 'InputfieldFieldset') && count($children)) {
                             $fieldset = $this->buildFieldset($key, $inputfield);
                             $element = $this->buildInputfields($children, $fieldset, $data);
                         } else {
@@ -174,13 +213,10 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
             $InputfieldFieldset->attr('id+name', $_nameID);
         }
         // Fieldset id
-        if($_id = $this->element('id', $settings, '')) {
-            $InputfieldFieldset->attr('id', $_id);
-        }
+        $InputfieldFieldset->attr('id', $this->id_prefix . $this->element('id', $settings, $name) . $this->id_suffix);
         // Fieldset name
-        if($_name = $this->element('name', $settings, '')) {
-            $InputfieldFieldset->attr('name', $_name);
-        }
+        $InputfieldFieldset->attr('name', $this->name_prefix . $this->element('name', $settings, $name) . $this->name_suffix);
+
         // Fieldset label
         if($label = $this->element('label', $settings, '')) {
             $InputfieldFieldset->label = $label;
@@ -216,37 +252,40 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
     protected function buildInputfield($name = '', $settings = array(), $data = array()) {
         $return = null;
         $type = $this->element("type", $settings, "");
+        if(strpos($type, 'Inputfield') === false) {
+            $type = 'Inputfield' . ucfirst($type);
+        }
         if($Inputfield = $this->modules->get($type)) {
-            // Field name+id
+            // Inputfield name+id
             if($_nameID = $this->element('name+id', $settings, $name)) {
                 $Inputfield->attr('name+id', $_nameID);
             }
-            // Field id
+            // Inputfield id
             $Inputfield->attr('id', $this->id_prefix . $this->element('id', $settings, $name) . $this->id_suffix);
-            // Field name
+            // Inputfield name
             $Inputfield->attr('name', $this->name_prefix . $this->element('name', $settings, $name) . $this->name_suffix);
 
-            // Field label
+            // Inputfield label
             if($label = $this->element('label', $settings, null)) {
                 $Inputfield->label = $label;
             }
-            // Field checkboxLabel
+            // Inputfield checkboxLabel
             if($checkboxLabel = $this->element('checkboxLabel', $settings, null)) {
                 $Inputfield->checkboxLabel = $checkboxLabel;
             }
-            // Field description
+            // Inputfield description
             if($description = $this->element('description', $settings, null)) {
                 $Inputfield->description = $description;
             }
-            // Field notes
+            // Inputfield notes
             if($notes = $this->element('notes', $settings, null)) {
                 $Inputfield->notes = $notes;
             }
-            // Field required
+            // Inputfield required
             if($required = $this->element('required', $settings, null)) {
                 $Inputfield->required = true;
             }
-            // Field value
+            // Inputfield value
             $default = $this->element("default", $settings, "");
             $value = $this->element($name, $data, $default);
             if($type == 'InputfieldCheckbox' && $value) {
@@ -254,32 +293,32 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
             } else {
                 $Inputfield->attr('value', $value);
             }
-            // Field options
+            // Inputfield options
             if($options = $this->element('options', $settings, null)) {
                 $Inputfield->addOptions($options);
             }
-            // Field columnWidth
+            // Inputfield columnWidth
             if($columnWidth = $this->element('columnWidth', $settings, null)) {
                 $Inputfield->columnWidth = $columnWidth;
             }
-            // Field showIf
+            // Inputfield showIf
             if($showIf = $this->element('showIf', $settings, '')) {
                 $Inputfield->showIf = $this->showIf($showIf);
             }
-            // Field collapsed
-            if($collapsed = $this->element('collapsed', $settings, Inputfield::collapsedNever)) {
+            // Inputfield collapsed
+            if($collapsed = $this->element('collapsed', $settings, "")) {
                 $Inputfield->collapsed = $collapsed;
             }
-            // Field icon
+            // Inputfield icon
             if($icon = $this->element('icon', $settings, '')) {
                 $Inputfield->icon = $icon;
             }
-            // Field attributes
+            // Inputfield attributes
             $attrs = $this->element('attrs', $settings, array());
             if(count($attrs)) {
                 foreach ($attrs as $key => $attr) $Inputfield->attr($key, $attr);
             }
-            // Field set options
+            // Inputfield set options
             $set = $this->element('set', $settings, array());
             if(count($set)) {
                 foreach ($set as $key => $val) $Inputfield->set($key, $val);
@@ -306,7 +345,7 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
             $if = '';
             foreach ($showIf as $key => $condition) {
                 $x = $i++;
-                $if .= $this->id_prefix . $key . $this->id_suffix . $condition;
+                $if .= $this->name_prefix . $key . $this->name_suffix . $condition;
                 if($x < count($showIf)) $if .= $separator;
             }
             return $if;
@@ -344,16 +383,5 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
      */
     public function getModuleConfigInputfields(array $data) {
         return $this->buildInputfields($this->configs, null, array_merge($this->defaults, $data));
-    }
-}
-
-if(!function_exists('InputfieldHelper')) {
-    /**
-     * Function for InputfieldHelper class
-     *
-     * @return InputfieldHelper
-     */
-    function InputfieldHelper() {
-        return wire('modules')->get('InputfieldHelper');
     }
 }

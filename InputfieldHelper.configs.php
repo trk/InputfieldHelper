@@ -1,31 +1,47 @@
 <?php namespace ProcessWire;
 return array(
-    "name_prefix" => array(
-        "label" => __("Name Prefix"),
-        "type" => "InputfieldText",
-        "description" => __("This will aplly given name prefix to all inputfields created by this module"),
+    "test_text" => array(
+        "label" => __("Text field"),
+        "type" => "text",
         "default" => "",
-        "columnWidth" => 50
+        "attrs" => array(
+            "placeholder" => __("Enter a value")
+        )
     ),
-    "name_suffix" => array(
-        "label" => __("Name Suffix"),
-        "type" => "InputfieldText",
-        "description" => __("This will aplly given name suffix to all inputfields created by this module"),
+    "test_text_show_if" => array(
+        "label" => __("Text field show if"),
+        "type" => "text",
         "default" => "",
-        "columnWidth" => 50
+        "attrs" => array(
+            "placeholder" => __("Enter a value")
+        ),
+        "showIf" => array(
+            "test_text" => "!=''"
+        )
     ),
-    "id_prefix" => array(
-        "label" => __("ID Prefix"),
-        "type" => "InputfieldText",
-        "description" => __("This will aplly given id prefix to all inputfields created by this module"),
-        "default" => "",
-        "columnWidth" => 50
-    ),
-    "id_suffix" => array(
-        "label" => __("ID Suffix"),
-        "type" => "InputfieldText",
-        "description" => __("This will aplly given id suffix to all inputfields created by this module"),
-        "default" => "",
-        "columnWidth" => 50
+    "test_textarea" => array(
+        "label" => __("Textarea field"),
+        "description" => __("This is a test Inputfield created by this module."),
+        "type" => "textarea",
+        "set" => array(
+            "rows" => 14
+        ),
+        "attrs" => array(
+            "placeholder" => __("You can enter some text here")
+        ),
+        "default" => "return array(
+            'test_fied' => array(
+                'label' => __('Test field'),
+                'description' => __('This is a test Inputfield created by this module.')
+                'type' => 'textarea',
+                'set' => array(
+                    'rows' => 14
+                ),
+                'attrs' => array(
+                    'placeholder' => __('You can enter some text here')
+                ),
+                'default' => 'example usage'
+            );
+        )"
     )
 );
