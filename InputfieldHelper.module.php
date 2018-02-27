@@ -59,13 +59,23 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "summary" => "This module creates Inputfields from config file.",
             "version" => 1,
-            "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
-            "icon" => "envelope-o",
+            "summary" => __("This module creates Inputfields from config file."),
             "href" => "https://github.com/trk/InputfieldHelper",
-            "autoload" => true,
-            "singular" => true
+            "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
+            "autoload" => false, //
+            // "permanent" => false,
+            "requires" => array(
+                "PHP>=5.6.0",
+                "ProcessWire>=3.0.0",
+            ),
+            "installs" => array(),
+            // "permanent" => false
+            // "permission" => "permission-name",
+            // "permissions" => array()
+            "icon" => "envelope-o",
+            // "singular" => false,
+            // "autoload" => false
         );
     }
 
