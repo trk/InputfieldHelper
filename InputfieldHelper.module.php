@@ -1,13 +1,20 @@
 <?php namespace ProcessWire;
 
 /**
- * Class WirePHPMailer
+ * Class InputfieldHelper
  *
  * @author			: İskender TOTOĞLU, @ukyo (community), @trk (Github)
  * @website			: https://www.altivebir.com
  * @projectWebsite	: https://github.com/trk/InputfieldHelper
  */
-class InputfieldHelper extends WireData implements Module, ConfigurableModule {
+class InputfieldHelper extends ModuleConfig implements Module {
+
+    /**
+     * InputfieldWrapper
+     *
+     * @var null
+     */
+    public $wrapper = null;
 
     /**
      * Inputfield Name Prefix
@@ -38,42 +45,37 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
     public $id_suffix = "";
 
     /**
-     * Module Configs
+     * Inputfields Values
+     *
+     * array(
+     *  "key" => "value"
+     * )
      *
      * @var array
      */
-    protected $configs = array();
-
-    /**
-     * Module Configs Defaults
-     *
-     * @var array
-     */
-    protected $defaults = array();
+    public $values = array();
 
     /**
      * Module info
      *
+     * @see Module
      * @return array
      */
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 1,
-            "summary" => __("This module creates Inputfields from config file."),
+            "version" => 2,
+            "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
-            "autoload" => false, //
-            // "permanent" => false,
             "requires" => array(
-                "PHP>=5.6.0",
-                "ProcessWire>=3.0.0",
+                "ProcessWire>=3.0.0"
             ),
-            "installs" => array(),
+            // "installs" => array(),
             // "permanent" => false
             // "permission" => "permission-name",
             // "permissions" => array()
-            "icon" => "envelope-o",
+            "icon" => "steam",
             // "singular" => false,
             // "autoload" => false
         );
@@ -87,257 +89,68 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
      * WireMailPHPMailer constructor.
      */
     public function __construct() {
-        $this->configs = $this->getModuleConfigs($this->className);
-        $this->defaults = $this->getDefaults($this->configs);
-        foreach($this->defaults as $key => $value) {
-            $this->$key = $value;
-        }
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Initialize the module
-     */
-    public function init() {
 
     }
 
     // ------------------------------------------------------------------------
 
     /**
-     * Return configs file for given path
+     * Return an InputfieldWrapper of Inputfields necessary to configure this module
      *
-     * @param string $path
-     * @return mixed
-     */
-    public function getConfigs($path = "") {
-        if(file_exists($path)) return include $path;
-        return array();
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Get module configs
+     * Values will be populated to the Inputfields automatically. However, you may also retrieve
+     * any of the values from $this->[property]; as needed.
      *
-     * @return array
-     */
-    public function getModuleConfigs($module_name = "", $filename = "") {
-        $filename = $filename ? $filename : $module_name . ".configs";
-        $path = $this->config->path($module_name) . $filename . ".php";
-        if(file_exists($path)) {
-            return include $path;
-        }
-        return array();
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Get config defaults
+     * Descending classes should call this method at the top of their getInputfields() method.
      *
-     * @param array $fields
-     * @return array
-     */
-    public function getDefaults($fields = array()) {
-        $return = array();
-        if(is_array($fields) && count($fields)) {
-            foreach ($fields as $key => $inputfield) {
-                if(is_array($inputfield)) {
-                    $type = $this->element('type', $inputfield);
-                    $children = $this->element('fields', $inputfield);
-                    if($type == 'InputfieldFieldset' && count($children)) {
-                        $return = array_merge($return, $this->getDefaults($children));
-                    } else {
-                        $return[$key] = $this->element("default", $inputfield, "");
-                    }
-                }
-            }
-        }
-        return $return;
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Build Inputfields
+     * Use this method only if defining Inputfield objects programatically. If definining via
+     * an array then you should not implement this method.
      *
-     * @param array $fields
-     * @param null $wrapper
-     * @param array $data
-     * @return null|InputfieldWrapper
-     * @throws WireException
-     * @throws WirePermissionException
-     */
-    public function buildInputfields($fields = array(), $wrapper = null, $data = array()) {
-        $wrapper = is_null($wrapper) ? new InputfieldWrapper() : $wrapper;
-        if(is_array($fields) && count($fields)) {
-            foreach ($fields as $key => $inputfield) {
-                if(is_array($inputfield)) {
-                    $type = $this->element('type', $inputfield);
-                    $children = $this->element('fields', $inputfield, array());
-
-                    $build = true;
-                    if(array_key_exists('build', $inputfield)) $build = $inputfield['build'];
-                    if($build === true) {
-                        $element = null;
-                        if(($type == 'fieldset' || $type == 'InputfieldFieldset') && count($children)) {
-                            $fieldset = $this->buildFieldset($key, $inputfield);
-                            $element = $this->buildInputfields($children, $fieldset, $data);
-                        } else {
-                            $element = $this->buildInputfield($key, $inputfield, $data);
-                        }
-                        if(!is_null($element)) {
-                            $insertBefore = $this->element('insertBefore', $inputfield, '');
-                            $insertAfter = $this->element('insertAfter', $inputfield, '');
-                            if($insertBefore && $wrapper->get($insertBefore) instanceof Inputfield) {
-                                $wrapper->insertBefore($element, $wrapper->get($insertBefore));
-                            } if($insertAfter && $wrapper->get($insertAfter) instanceof Inputfield) {
-                                $wrapper->insertAfter($element, $wrapper->get($insertAfter));
-                            } else {
-                                $wrapper->add($element);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $wrapper;
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Build Fieldset
-     *
-     * @param string $name
-     * @param array $settings
-     * @return array|mixed|null|_Module|Field|Fieldtype|Module|NullPage|Page|Permission|Role|Template|WireData|WireInputData|string
+     * @return InputfieldWrapper
      * @throws WireException
      */
-    protected function buildFieldset($name = '', $settings = array()) {
-        $InputfieldFieldset = $this->modules->get('InputfieldFieldset');
-        // Fieldset id+name
-        if($_nameID = $this->element('id+name', $settings, $name)) {
-            $InputfieldFieldset->attr('id+name', $_nameID);
-        }
-        // Fieldset id
-        $InputfieldFieldset->attr('id', $this->id_prefix . $this->element('id', $settings, $name) . $this->id_suffix);
-        // Fieldset name
-        $InputfieldFieldset->attr('name', $this->name_prefix . $this->element('name', $settings, $name) . $this->name_suffix);
-
-        // Fieldset label
-        if($label = $this->element('label', $settings, '')) {
-            $InputfieldFieldset->label = $label;
-        }
-        // Fieldset description
-        if($description = $this->element('description', $settings, '')) {
-            $InputfieldFieldset->description = $description;
-        }
-        // Field collapsed
-        // @NOTE : Inputfield::collapsedNever not working for fieldset
-        if($collapsed = $this->element('collapsed', $settings, Inputfield::collapsedYes)) {
-            $InputfieldFieldset->collapsed = $collapsed;
-        }
-        // Fieldset showIf
-        if($showIf = $this->element('showIf', $settings, '')) {
-            $InputfieldFieldset->showIf = $this->showIf($showIf);
+    public function getInputfields() {
+        foreach($this->getDefaults() as $key => $value) {
+            $this->set($key, $value);
         }
 
-        return $InputfieldFieldset;
+        if(is_null($this->wrapper)) $inputfields = $this->wire(new InputfieldWrapper());
+        else $inputfields = $this->wrapper;
+
+        if(count($this->inputfieldsArray)) {
+            $inputfieldsArray = $this->prepareInputfields($this->inputfieldsArray);
+            $inputfields->add($inputfieldsArray);
+        }
+        return $inputfields;
     }
 
     // ------------------------------------------------------------------------
 
     /**
-     * Build Inputfield*
+     * Prepare $this->inputfieldsArray for render
      *
-     * @param string $name
-     * @param array $settings
-     * @param array $data
-     * @return null|_Module|Module
-     * @throws WirePermissionException
+     * @param array $inputfields
+     * @return array
      */
-    protected function buildInputfield($name = '', $settings = array(), $data = array()) {
-        $return = null;
-        $type = $this->element("type", $settings, "");
-        if(strpos($type, 'Inputfield') === false) {
-            $type = 'Inputfield' . ucfirst($type);
+    public function prepareInputfields($inputfields = array()) {
+        if(count($inputfields)) {
+            foreach ($inputfields as $key => $inputfield) {
+                $children = $this->element("children", $inputfield, array());
+
+                $id = $this->element("id", $inputfield, $key);
+                $name = $this->element("name", $inputfield, $key);
+                $value = $this->element($key, $this->values, $this->element("value", $inputfield, ""));
+
+                $inputfields[$key]["id"] = $this->id_prefix . $id . $this->id_suffix;
+                $inputfields[$key]["name"] = $this->name_prefix . $name . $this->name_suffix;
+                $inputfields[$key]["value"] = $value;
+
+                if($showIf = $this->element('showIf', $inputfield, '')) {
+                    $inputfields[$key]["showIf"] = $this->showIf($showIf);
+                }
+                if(count($children)) $inputfields[$key]["children"] = $this->prepareInputfields($children);
+            }
         }
-        if($Inputfield = $this->modules->get($type)) {
-            // Inputfield name+id
-            if($_nameID = $this->element('name+id', $settings, $name)) {
-                $Inputfield->attr('name+id', $_nameID);
-            }
-            // Inputfield id
-            $Inputfield->attr('id', $this->id_prefix . $this->element('id', $settings, $name) . $this->id_suffix);
-            // Inputfield name
-            $Inputfield->attr('name', $this->name_prefix . $this->element('name', $settings, $name) . $this->name_suffix);
-
-            // Inputfield label
-            if($label = $this->element('label', $settings, null)) {
-                $Inputfield->label = $label;
-            }
-            // Inputfield checkboxLabel
-            if($checkboxLabel = $this->element('checkboxLabel', $settings, null)) {
-                $Inputfield->checkboxLabel = $checkboxLabel;
-            }
-            // Inputfield description
-            if($description = $this->element('description', $settings, null)) {
-                $Inputfield->description = $description;
-            }
-            // Inputfield notes
-            if($notes = $this->element('notes', $settings, null)) {
-                $Inputfield->notes = $notes;
-            }
-            // Inputfield required
-            if($required = $this->element('required', $settings, null)) {
-                $Inputfield->required = true;
-            }
-            // Inputfield value
-            $default = $this->element("default", $settings, "");
-            $value = $this->element($name, $data, $default);
-            if($type == 'InputfieldCheckbox' && $value) {
-                $Inputfield->attr('checked', 'checked');
-            } else {
-                $Inputfield->attr('value', $value);
-            }
-            // Inputfield options
-            if($options = $this->element('options', $settings, null)) {
-                $Inputfield->addOptions($options);
-            }
-            // Inputfield columnWidth
-            if($columnWidth = $this->element('columnWidth', $settings, null)) {
-                $Inputfield->columnWidth = $columnWidth;
-            }
-            // Inputfield showIf
-            if($showIf = $this->element('showIf', $settings, '')) {
-                $Inputfield->showIf = $this->showIf($showIf);
-            }
-            // Inputfield collapsed
-            if($collapsed = $this->element('collapsed', $settings, "")) {
-                $Inputfield->collapsed = $collapsed;
-            }
-            // Inputfield icon
-            if($icon = $this->element('icon', $settings, '')) {
-                $Inputfield->icon = $icon;
-            }
-            // Inputfield attributes
-            $attrs = $this->element('attrs', $settings, array());
-            if(count($attrs)) {
-                foreach ($attrs as $key => $attr) $Inputfield->attr($key, $attr);
-            }
-            // Inputfield set options
-            $set = $this->element('set', $settings, array());
-            if(count($set)) {
-                foreach ($set as $key => $val) $Inputfield->set($key, $val);
-            }
-
-            $return = $Inputfield;
-        }
-
-        return $return;
+        return $inputfields;
     }
 
     // ------------------------------------------------------------------------
@@ -379,19 +192,5 @@ class InputfieldHelper extends WireData implements Module, ConfigurableModule {
      */
     public function element($item, array $array, $default = NULL) {
         return array_key_exists($item, $array) && $array[$item] ? $array[$item] : $default;
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Module configuration
-     *
-     * @param array $data
-     * @return null|InputfieldWrapper
-     * @throws WireException
-     * @throws WirePermissionException
-     */
-    public function getModuleConfigInputfields(array $data) {
-        return $this->buildInputfields($this->configs, null, array_merge($this->defaults, $data));
     }
 }

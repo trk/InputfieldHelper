@@ -1,54 +1,49 @@
 # InputfieldHelper
 
-This module creates Inputfields from array configs. You can see example usage below.
+This module extends base `ModuleConfig` class add some features to this class.
 
-### Example config file :
+### Usage almost same with base `ModuleConfig` class :
 ```php
 <?php namespace ProcessWire;
-$configs = array(
-    "test_text" => array(
-        "label" => __("Text field"),
-        "type" => "text",
-        "default" => "",
-        "attrs" => array(
-            "placeholder" => __("Enter a value")
+$InputfieldHelper = wire("modules")->get("InputfieldHelper");
+$InputfieldHelper->wrapper = null;
+$InputfieldHelper->name_prefix = "";
+$InputfieldHelper->name_suffix = "";
+$InputfieldHelper->id_prefix = "";
+$InputfieldHelper->id_suffix = "";
+$InputfieldHelper->values = array();
+$InputfieldHelper->add(
+    array(
+        "firstname" => array(
+            "label" => __("Firs name"),
+            "type" => "text",
+            "placeholder" => __("Enter your first name"),
+            "columnWidth" => 50
+        ),
+        "lastname" => array(
+            "label" => __("Last name"),
+            "type" => "text",
+            "placeholder" => __("Enter your last name"),
+            "showIf" => "firstname!=''",
+            "columnWidth" => 50
+        ),
+        "subject" => array(
+            "label" => __("Subject"),
+            "type" => "text",
+            "placeholder" => __("Enter a subject"),
+            "showIf" => array(
+                "firstname" => "!=''",
+                "lastname" => "!=''"
+            )
+        ),
+        "message" => array(
+            "label" => __("Message"),
+            "type" => "textarea",
+            "placeholder" => __("Enter your message"),
+            "showIf" => "subject!=''"
         )
-    ),
-    "test_text_show_if" => array(
-        "label" => __("Text field show if"),
-        "type" => "text",
-        "default" => "",
-        "attrs" => array(
-            "placeholder" => __("Enter a value")
-        ),
-        "showIf" => array(
-            "test_text" => "!=''"
-        )
-    ),
-    "test_textarea" => array(
-        "label" => __("Test field"),
-        "description" => __("This is a test Inputfield created by this module."),
-        "type" => "textarea",
-        "set" => array(
-            "rows" => 12
-        ),
-        "attrs" => array(
-            "placeholder" => __("You can enter some text here")
-        ),
-        "default" => ""
     )
 );
 
-$InputfieldHelper = wire("modules")->get("InputfieldHelper");
-$defaults = $InputfieldHelper->getDefaults($configs);
-echo "<pre>" . print_r($defaults, true) . "</pre>";
-echo $InputfieldHelper->buildInputfields($configs)->render();
-
-// ------------------------------------------------------------------------
-
-// Create a form with same configs by passing a wrapper
-$form = modules()->get("InputfieldForm");
-$form->action = "./";
-$form->method = "post";
-echo $InputfieldHelper->buildInputfields($configs, $form)->render();
+echo $InputfieldHelper->getInputfields()->render();
 ```
