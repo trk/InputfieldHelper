@@ -4,7 +4,7 @@
 
 - README.md
 
-### Updated
+### Added
 
 - `render()` function added
 
