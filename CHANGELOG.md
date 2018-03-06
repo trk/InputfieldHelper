@@ -1,5 +1,15 @@
 # Changelog
 
+### Updated
+
+- README.md
+
+### Updated
+
+- `render()` function added
+
+## v.0.0.3
+
 ### Added
 
 - `iHelper();` shortcut function added

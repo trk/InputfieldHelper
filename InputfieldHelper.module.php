@@ -200,7 +200,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 2,
+            "version" => 3,
             "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
@@ -466,6 +466,18 @@ class InputfieldHelper extends ModuleConfig implements Module {
             $inputfields->add($inputfieldsArray);
         }
         return $inputfields;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Render Inputfields
+     *
+     * @return string
+     * @throws WireException
+     */
+    public function render() {
+        return $this->getInputfields()->render();
     }
 
     // ------------------------------------------------------------------------

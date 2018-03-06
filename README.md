@@ -5,7 +5,7 @@ This module extends base `ModuleConfig` class add some features to this class.
 [Cahangelog](CHANGELOG.md)
 
 ### Usage almost same with base `ModuleConfig` class, but we have more :
-![Example code output](example-output.png)
+![Example code output](https://github.com/trk/InputfieldHelper/raw/master/example-output.png)
 ```php
 <?php namespace ProcessWire;
 // An example code for creating search form. This form using get method
@@ -72,5 +72,5 @@ $iHelper->add(array(
         "skipLabel" => Inputfield::skipLabelBlank
     )
 ));
-echo $iHelper->getInputfields()->render();
+echo $iHelper->render();
 ```
