@@ -2,6 +2,8 @@
 
 This module extends base `ModuleConfig` class add some features to this class.
 
+[Cahangelog](CHANGELOG.md)
+
 ### Usage almost same with base `ModuleConfig` class, but we have more :
 ![Example code output](example-output.png)
 ```php
