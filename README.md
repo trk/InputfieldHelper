@@ -2,48 +2,73 @@
 
 This module extends base `ModuleConfig` class add some features to this class.
 
-### Usage almost same with base `ModuleConfig` class :
+### Usage almost same with base `ModuleConfig` class, but we have more :
+![Example code output](example-output.png)
 ```php
 <?php namespace ProcessWire;
-$InputfieldHelper = wire("modules")->get("InputfieldHelper");
-$InputfieldHelper->wrapper = null;
-$InputfieldHelper->name_prefix = "";
-$InputfieldHelper->name_suffix = "";
-$InputfieldHelper->id_prefix = "";
-$InputfieldHelper->id_suffix = "";
-$InputfieldHelper->values = array();
-$InputfieldHelper->add(
-    array(
-        "firstname" => array(
-            "label" => __("Firs name"),
-            "type" => "text",
-            "placeholder" => __("Enter your first name"),
-            "columnWidth" => 50
-        ),
-        "lastname" => array(
-            "label" => __("Last name"),
-            "type" => "text",
-            "placeholder" => __("Enter your last name"),
-            "showIf" => "firstname!=''",
-            "columnWidth" => 50
-        ),
-        "subject" => array(
-            "label" => __("Subject"),
-            "type" => "text",
-            "placeholder" => __("Enter a subject"),
-            "showIf" => array(
-                "firstname" => "!=''",
-                "lastname" => "!=''"
-            )
-        ),
-        "message" => array(
-            "label" => __("Message"),
-            "type" => "textarea",
-            "placeholder" => __("Enter your message"),
-            "showIf" => "subject!=''"
-        )
+// An example code for creating search form. This form using get method
+$iHelper = iHelper();
+$iHelper->collapsed = Inputfield::collapsedNever;
+$iHelper->resetMarkup = true;
+$iHelper->resetClasses = true;
+// You can set form values from here or directly to inputfield options by using `"value" => "field-value"`
+$iHelper->values = array(
+    "yacht_type" => "sailing",
+    "number_of_guests" => 5,
+    "destination" => "turkey"
+);
+$iHelper->markup = array(
+    "list" => "<div class='uk-grid'>{out}</div>",
+    "item" => "<div class='uk-width-1-4@m uk-margin-top'>{out}</div>",
+    "InputfieldSubmit" => array(
+            "item" => "<div class='uk-width-1-4 uk-text-right@m uk-margin-top'>{out}</div>",
     )
 );
-
-echo $InputfieldHelper->getInputfields()->render();
+$iHelper->add(array(
+    "yacht_type" => array(
+        "type" => "select",
+        "options" => array(
+            "" => __("Type of Yacht"),
+            "sailing" => __("Sailing Yachts"),
+            "motor" => __("Motor Yachts"),
+            "gulet" => __("Gulets"),
+            "catamaran" => __("Catamarans")
+        ),
+        "skipLabel" => Inputfield::skipLabelBlank
+    ),
+    "number_of_guests" => array(
+        "type" => "select",
+        "options" => array(
+            "" => __("Number of Guests"),
+            1 => 1,
+            2 => 2,
+            3 => 3,
+            4 => 4,
+            5 => 5,
+            6 => 6,
+            7 => 7,
+            8 => 8, 
+            9 => 9,
+            10 => 10,
+            "10+" => "10+"
+        ),
+        "skipLabel" => Inputfield::skipLabelBlank
+    ),
+    "destination" => array(
+        "type" => "select",
+        "options" => array(
+            "" => __("Destinations"),
+            "turkey" => __("Turkey"),
+            "greece" => __("Greece"),
+            "croatia" => __("Croatia")            
+        ),
+        "skipLabel" => Inputfield::skipLabelBlank
+    ),
+    "submit" => array(
+        "type" => "submit",
+        "value" => __("Filer Yachts"),
+        "skipLabel" => Inputfield::skipLabelBlank
+    )
+));
+echo $iHelper->getInputfields()->render();
 ```
