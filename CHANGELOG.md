@@ -2,6 +2,12 @@
 
 ### Updated
 
+- Grid widths for `uikit3`
+
+## v.0.0.4
+
+### Updated
+
 - README.md
 
 ### Added

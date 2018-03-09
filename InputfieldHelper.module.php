@@ -200,7 +200,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 3,
+            "version" => 4,
             "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
@@ -411,12 +411,18 @@ class InputfieldHelper extends ModuleConfig implements Module {
         // determine column width class
         // uk class => width %
         $ukGridWidths = array(
-            "100%" => "1-1",
-            "83%" => "5-6",
             "80%" => "4-5",
+            "75%" => "3-4",
+            "70%" => "2-3",
+            "64%" => "2-3",
             "60%" => "3-5",
             "50%" => "1-2",
+            "45%" => "1-2",
+            "40%" => "2-5",
+            "34%" => "1-3",
             "33%" => "1-3",
+            "32%" => "2-6",
+            "30%" => "1-3",
             "25%" => "1-4",
             "20%" => "1-5",
             "16%" => "1-6"
