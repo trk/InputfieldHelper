@@ -2,7 +2,7 @@
 
 This module extends base `ModuleConfig` class add some features to this class.
 
-[Cahangelog](https://github.com/trk/InputfieldHelper/raw/master/CHANGELOG.md)
+[Cahangelog](CHANGELOG.md)
 
 ### Usage almost same with base `ModuleConfig` class, but we have more :
 ![Example code output](https://github.com/trk/InputfieldHelper/raw/master/example-output.png)
