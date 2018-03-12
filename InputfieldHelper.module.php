@@ -115,11 +115,13 @@ class InputfieldHelper extends ModuleConfig implements Module {
     /**
      * Inputfield Variations
      *
+     * Allow to use inputfield based markup, append and prepend
+     *
      * @var array
      */
     protected $inputfield = array(
-        "markup" => array(),
-        "classes" => array(),
+        "markup" => "{input}",
+        // "classes" => array(),
         "append" => "",
         "prepend" => ""
     );
@@ -200,7 +202,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 4,
+            "version" => 5,
             "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
@@ -299,6 +301,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
                 // Get inputfield
                 $inputfieldArray = $this->element($name, $this->inputfieldsArray, array());
 
+                /*
                 $append = $this->element("append", $inputfieldArray, "");
                 $prepend = $this->element("prepend", $inputfieldArray, "");
                 $markup = $this->element("markup", $inputfieldArray, array());
@@ -318,6 +321,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
                 } else {
                     $inputfieldWrapper->setClasses($classesWrapper);
                 }
+                */
 
                 if(in_array($this->framework, $this->frameworks)) {
                     if($this->framework == "uikit2" || $this->framework == "uikit3") {
@@ -349,10 +353,14 @@ class InputfieldHelper extends ModuleConfig implements Module {
                     }
                 }
 
+                $append = $this->element("append", $inputfieldArray, "");
+                $prepend = $this->element("prepend", $inputfieldArray, "");
+                $markup = $this->element("markup", $inputfieldArray, array());
                 if($append || $prepend) {
-                    $inputfield->addHookAfter('render', function($inputfieldEvent) use($append, $prepend) {
+                    $inputfield->addHookAfter('render', function($inputfieldEvent) use($append, $prepend, $markup) {
                         $inputfieldEvent->replace = true;
-                        $inputfieldEvent->return = $prepend . $inputfieldEvent->return . $append;
+                        $return = $prepend . $inputfieldEvent->return . $append;
+                        $inputfieldEvent->return = str_replace("{input}", $return, $markup);
                     });
                 }
             }

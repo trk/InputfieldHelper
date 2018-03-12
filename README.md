@@ -26,6 +26,13 @@ $iHelper->markup = array(
             "item" => "<div class='uk-width-1-4 uk-text-right@m uk-margin-top'>{out}</div>",
     )
 );
+
+$iHelper->wrapper = modules()->get("InputfieldForm");
+$iHelper->wrapper->action = "./";
+$iHelper->wrapper->method = "get";
+$iHelper->wrapper->attr("name", "search-from");
+$iHelper->wrapper->attr("id", "search-from");
+
 $iHelper->add(array(
     "yacht_type" => array(
         "type" => "select",

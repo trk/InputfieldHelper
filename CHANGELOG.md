@@ -1,5 +1,19 @@
 # Changelog
 
+### Added
+
+- `InputfieldForm` to README.md example
+
+### Updated
+
+- Allow to use custom markup for each `inputfield`
+
+### Removed
+
+- Adding custom classes by using `'inputfield' => array("classes" => array())`, this could be done by using custom markup
+
+## v.0.0.5
+
 ### Updated
 
 - Grid widths for `uikit3`
