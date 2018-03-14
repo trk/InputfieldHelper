@@ -2,6 +2,17 @@
 
 ### Added
 
+- Default uikit2 and uikit3 options
+- `isUikit()` function for checking framework is Uikit ? If it is, return version number.
+
+## Fixed
+
+- Hiding `hidden` input type on Wrapper
+
+## v.0.0.7
+
+### Added
+
 - Uikit 3 icon support
 - `iconPosition` *options : * `left (default)`, `right`
 - `iconClickable` *options: * `false (default), true`

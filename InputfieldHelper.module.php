@@ -143,11 +143,36 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public $frameworkBreakpoint = "@m";
 
     /**
+     * Uikit Options
+     *
+     * @var array
+     */
+    protected $uikitOptions = array(
+        "resetMarkup" => true,
+        "resetClasses" => true,
+        "classes" => array(
+            "list" => "uk-grid",
+            "item_label" => "uk-form-label",
+            "InputfieldSubmit" => array(
+                "item" => "uk-margin"
+            )
+        ),
+        "markup" => array(
+            "list" => '<div {attrs}>{out}</div>',
+            "item" => '<div {attrs}><div class="uk-form-controls">{out}</div></div>',
+            "item_label" => '<label class="{class}" for="{for}">{out}</label>'
+        )
+    );
+
+    /**
      * Front-end Frameworks
      *
      * @var array
      */
-    protected $frameworks = array("uikit2", "uikit3");
+    protected $frameworks = array(
+        "uikit2" => array(),
+        "uikit3" => array()
+    );
 
     /**
      * Inputfield Name Prefix
@@ -204,7 +229,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 6,
+            "version" => 7,
             "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
@@ -276,9 +301,49 @@ class InputfieldHelper extends ModuleConfig implements Module {
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Check framework is Uikit and return version, else return false
+     *
+     * @return bool|int
+     */
+    protected function isUikit() {
+        if($this->framework == "uikit2" || $this->framework == "uikit3") {
+            if($this->framework == "uikit2") {
+                return 2;
+            } else {
+                return 3;
+            }
+        }
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+
+
     public function ___prepareInputfields() {
+        $this->wire("config")->inputfieldWrapper = array(
+            "useColumnWidth" => false
+        );
         $this->addHookBefore('InputfieldWrapper::render', function($event) {
             $inputfieldWrapper = $event->object;
+            $inputfieldWrapper->useColumnWidth = false;
+            $framework = $this->element($this->framework, $this->frameworks, array());
+
+            // Replace Uikit Framework defaults
+            if($this->isUikit()) {
+                $framework = $this->uikitOptions;
+            }
+
+            // Set framework defaults
+            if(count($framework)) {
+                foreach ($framework as $k => $v) {
+                    if($k == "markup" && count($this->markup) || $k == "classes" && count($this->classes)) {
+                        // don nothing
+                    } else {
+                        $this->$k = $v;
+                    }
+                }
+            }
 
             // Clean markup and classes
             if($this->resetMarkup) $inputfieldWrapper->setMarkup($this->cleanMarkup);
@@ -329,9 +394,8 @@ class InputfieldHelper extends ModuleConfig implements Module {
                 } else {
                     $inputfieldWrapper->setClasses($classesWrapper);
                 }
-
-                if(in_array($this->framework, $this->frameworks)) {
-                    if($this->framework == "uikit2" || $this->framework == "uikit3") {
+                if(count($framework)) {
+                    if($this->isUikit() === 2 || $this->isUikit() === 3) {
                         if($inputfield instanceof InputfieldTextarea) {
                             $inputfield->addClass('uk-textarea');
                         } else if($inputfield instanceof InputfieldSelect) {
@@ -348,15 +412,17 @@ class InputfieldHelper extends ModuleConfig implements Module {
                             $inputfield->addClass('uk-form-controls-text', 'contentClass');
                         } else if($inputfield instanceof InputfieldSubmit || $inputfield instanceof InputfieldButton) {
                             $inputfield->addClass('uk-button uk-button-primary');
-                        } else if($inputfield instanceof InputfieldHidden) {
-                            $inputfield->wrapAttr('class', 'uk-hidden');
                         }
                     }
 
-                    if($this->framework == "uikit2") {
-                        $inputfield->wrapAttr('class', $this->frameworkUikit2($inputfield->columnWidth));
-                    } elseif($this->framework == "uikit3") {
-                        $inputfield->wrapAttr('class', $this->frameworkUikit3($inputfield->columnWidth));
+                    if($this->isUikit() && $inputfield instanceof InputfieldHidden) {
+                        $inputfield->wrapAttr('class', 'uk-hidden');
+                    } else {
+                        if($this->isUikit() === 2) {
+                            $inputfield->wrapAttr('class', $this->frameworkUikit2($inputfield->columnWidth));
+                        } elseif($this->isUikit() === 3) {
+                            $inputfield->wrapAttr('class', $this->frameworkUikit3($inputfield->columnWidth));
+                        }
                     }
                 }
 
@@ -366,7 +432,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
 
                     $icon = "";
                     $hasIcon = false;
-                    if($addons["icon"] && $this->framework == "uikit3") $hasIcon = true;
+                    if($addons["icon"] && $this->isUikit() === 3) $hasIcon = true;
                     if ($hasIcon) {
                         $iconTag = "span";
                         $iconHref = "";
