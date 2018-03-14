@@ -2,6 +2,20 @@
 
 ### Added
 
+- Uikit 3 icon support
+- `iconPosition` *options : * `left (default)`, `right`
+- `iconClickable` *options: * `false (default), true`
+- `iconClass` you can set a icon class
+- Inputfield `"_markup" => "{out}"` for add custom markup for rendered inputfield
+
+### Changed
+
+- Inputfield `"markup" => "{input}",` to `"markup" => array()` *note :* we will use `markup` for change wrapper markup for each inputfield
+
+## v.0.0.6
+
+### Added
+
 - `InputfieldForm` to README.md example
 
 ### Updated

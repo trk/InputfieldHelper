@@ -120,8 +120,10 @@ class InputfieldHelper extends ModuleConfig implements Module {
      * @var array
      */
     protected $inputfield = array(
-        "markup" => "{input}",
-        // "classes" => array(),
+        "markup" => array(),
+        "classes" => array(),
+        // Inputfield based markup, this will surround rendered input after prepend and append values attached.
+        "_markup" => "{out}",
         "append" => "",
         "prepend" => ""
     );
@@ -202,7 +204,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 5,
+            "version" => 6,
             "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
@@ -300,10 +302,16 @@ class InputfieldHelper extends ModuleConfig implements Module {
                 $name = $inputfield->name;
                 // Get inputfield
                 $inputfieldArray = $this->element($name, $this->inputfieldsArray, array());
+                $inputfieldMarkup = $this->element("_markup", $inputfieldArray, $this->inputfield["_markup"]);
+                $addons = array(
+                    "append" => $this->element("append", $inputfieldArray, ""),
+                    "prepend" => $this->element("prepend", $inputfieldArray, ""),
+                    "icon" => $this->element("icon", $inputfieldArray, ""),
+                    "iconClass" => $this->element("iconClass", $inputfieldArray, ""),
+                    "iconPosition" => $this->element("iconPosition", $inputfieldArray, "left"),
+                    "iconClickable" => $this->element("iconClickable", $inputfieldArray)
+                );
 
-                /*
-                $append = $this->element("append", $inputfieldArray, "");
-                $prepend = $this->element("prepend", $inputfieldArray, "");
                 $markup = $this->element("markup", $inputfieldArray, array());
                 $classes = $this->element("classes", $inputfieldArray, array());
 
@@ -321,7 +329,6 @@ class InputfieldHelper extends ModuleConfig implements Module {
                 } else {
                     $inputfieldWrapper->setClasses($classesWrapper);
                 }
-                */
 
                 if(in_array($this->framework, $this->frameworks)) {
                     if($this->framework == "uikit2" || $this->framework == "uikit3") {
@@ -353,16 +360,38 @@ class InputfieldHelper extends ModuleConfig implements Module {
                     }
                 }
 
-                $append = $this->element("append", $inputfieldArray, "");
-                $prepend = $this->element("prepend", $inputfieldArray, "");
-                $markup = $this->element("markup", $inputfieldArray, array());
-                if($append || $prepend) {
-                    $inputfield->addHookAfter('render', function($inputfieldEvent) use($append, $prepend, $markup) {
-                        $inputfieldEvent->replace = true;
-                        $return = $prepend . $inputfieldEvent->return . $append;
-                        $inputfieldEvent->return = str_replace("{input}", $return, $markup);
-                    });
-                }
+                $inputfield->addHookAfter('render', function($inputfieldEvent) use($addons, $inputfieldMarkup) {
+                    $inputfieldEvent->replace = true;
+                    $return = "";
+
+                    $icon = "";
+                    $hasIcon = false;
+                    if($addons["icon"] && $this->framework == "uikit3") $hasIcon = true;
+                    if ($hasIcon) {
+                        $iconTag = "span";
+                        $iconHref = "";
+                        $iconClass = "uk-form-icon";
+                        if($addons["iconClass"]) $iconClass .= ' ' . $addons["iconClass"];
+                        if($addons["iconPosition"] == "right") $iconClass .= " uk-form-icon-flip";
+                        if($addons["iconClickable"]) {
+                            $iconTag = 'a';
+                            $iconHref = ' href="#"';
+                        }
+                        $icon = '<' . $iconTag . ' class="' . $iconClass . '"' . $iconHref . ' data-uk-icon="icon: ' . $addons["icon"] . '"></' . $iconTag . '>';
+                    }
+                    if($hasIcon) {
+                        if ($addons["icon"]) {
+                            $return .= '<div class="uk-inline">' . $icon;
+                        }
+                    }
+                    $return .= $addons["prepend"] . $inputfieldEvent->return . $addons["append"];
+                    if($hasIcon) {
+                        if ($addons["icon"]) {
+                            $return .= '</div>';
+                        }
+                    }
+                    $inputfieldEvent->return = str_replace($this->inputfield["_markup"], $return, $inputfieldMarkup);
+                });
             }
         });
     }
