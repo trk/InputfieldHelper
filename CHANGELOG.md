@@ -2,6 +2,19 @@
 
 ### Added
 
+- `setExclude($name = "label|desctiption|notes|required|value", $value => array(), $type = "name|type")` function for set exclude value
+- `labels()` function for get list of labels
+- `descriptions()` function for get list of descriptions
+- `notes()` function for get list of notes
+- `values()` function for get list of values
+- `requiredFields()` function for get list of required fields
+- `contact form` example to readme.md
+
+## v.0.0.8
+
+
+### Added
+
 - Default uikit2 and uikit3 options
 - `isUikit()` function for checking framework is Uikit ? If it is, return version number.
 

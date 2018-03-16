@@ -67,7 +67,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
         "item_label" => "{out}",
         "item_label_hidden" => "{out}",
         "item_content" => "{out}",
-        "item_error" => "{out}",
+        "item_error" => '{out}',
         "item_description" => "{out}",
         "item_head" => "{out}",
         "item_notes" => "{out}",
@@ -160,7 +160,8 @@ class InputfieldHelper extends ModuleConfig implements Module {
         "markup" => array(
             "list" => '<div {attrs}>{out}</div>',
             "item" => '<div {attrs}><div class="uk-form-controls">{out}</div></div>',
-            "item_label" => '<label class="{class}" for="{for}">{out}</label>'
+            "item_label" => '<label class="{class}" for="{for}">{out}</label>',
+            "item_error" => ' <span class="uk-text-danger uk-text-small">{out}</span>',
         )
     );
 
@@ -210,7 +211,60 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public $collapsed = null;
 
     /**
-     * Inputfields Values
+     * Exclude by name or by type input fields (for labels, descriptions, notes, requiredFields, values)
+     *
+     * @var array
+     */
+    protected $excludes = array(
+        "byNameLabel" => array("submit"),
+        "byTypeLabel" => array("submit", "button", "markup"),
+        "byNameDescription" => array("submit"),
+        "byTypeDescription" => array("submit", "button", "markup"),
+        "byNameNotes" => array("submit"),
+        "byTypeNotes" => array("submit", "button", "markup"),
+        "byNameRequired" => array("submit"),
+        "byTypeRequired" => array("submit", "button", "markup", "hidden"),
+        "byNameValue" => array("submit"),
+        "byTypeValue" => array("submit", "button", "markup")
+    );
+
+    /**
+     * List of inputfield labels
+     *
+     * @var array
+     */
+    protected $labels = array();
+
+    /**
+     * List of inputfield descriptions
+     *
+     * @var array
+     */
+    protected $descriptions = array();
+
+    /**
+     * List of inputfield notes
+     *
+     * @var array
+     */
+    protected $notes = array();
+
+    /**
+     * List of required inputfields
+     *
+     * @var array
+     */
+    protected $requiredFields = array();
+
+    /**
+     * List of inputfield values
+     *
+     * @var array
+     */
+    protected $inputfieldValues = array();
+
+    /**
+     * Set Inputfields Values
      *
      * array(
      *  "key" => "value"
@@ -229,7 +283,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 7,
+            "version" => 8,
             "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
@@ -580,6 +634,68 @@ class InputfieldHelper extends ModuleConfig implements Module {
     // ------------------------------------------------------------------------
 
     /**
+     * Set excludes value
+     *
+     * @param string $name "label|description|notes|required|value"
+     * @param array $value
+     * @param string $by "name|type"
+     */
+    public function setExclude($name = "", $value = array(), $by = "name") {
+        $name = "by" . ucfirst($by) . ucfirst($name);
+        if($this->element($name, $this->excludes)) {
+            $this->excludes[$name] = $value;
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+
+    /**
+     * Get list of inputfields values
+     *
+     * @return array
+     */
+    public function values() { return $this->inputfieldValues; }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get list of inputfields labels
+     *
+     * @return array
+     */
+    public function labels() { return $this->labels; }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get list of inputfileds descriptions
+     *
+     * @return array
+     */
+    public function descriptions() { return $this->descriptions; }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get list of inputfields notes
+     *
+     * @return array
+     */
+    public function notes() { return $this->notes; }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get list of required inputfields
+     *
+     * @return array
+     */
+    public function requiredFields() { return $this->requiredFields; }
+
+    // ------------------------------------------------------------------------
+
+    /**
      * Render Inputfields
      *
      * @return string
@@ -606,9 +722,40 @@ class InputfieldHelper extends ModuleConfig implements Module {
                 $name = $this->element("name", $inputfield, $key);
                 $value = $this->element($key, $this->values, $this->element("value", $inputfield, ""));
 
-                $inputfields[$key]["id"] = $this->id_prefix . $id . $this->id_suffix;
-                $inputfields[$key]["name"] = $this->name_prefix . $name . $this->name_suffix;
+                $id = $this->id_prefix . $id . $this->id_suffix;
+                $name = $this->name_prefix . $name . $this->name_suffix;
+
+                $inputfields[$key]["id"] = $id;
+                $inputfields[$key]["name"] = $name;
                 $inputfields[$key]["value"] = $value;
+
+                $type = $this->element("type", $inputfield, "");
+
+                // Set values
+                if(!in_array($name, $this->excludes["byNameValue"]) && !in_array($type, $this->excludes["byTypeValue"])) {
+                    $this->inputfieldValues[$name] = $value;
+                }
+                // Set labels
+                $label = $this->element("label", $inputfield, "");
+                if(!in_array($name, $this->excludes["byNameLabel"]) && !in_array($type, $this->excludes["byTypeLabel"])) {
+                    $this->labels[$name] = $label;
+                }
+                // Set descriptions
+                $description = $this->element("description", $inputfield, "");
+                if(!in_array($name, $this->excludes["byNameDescription"]) && !in_array($type, $this->excludes["byTypeDescription"])) {
+                    $this->descriptions[$name] = $description;
+                }
+                // Set notes
+                $notes = $this->element("notes", $inputfield, "");
+                if(!in_array($name, $this->excludes["byNameNotes"]) && !in_array($type, $this->excludes["byTypeNotes"])) {
+                    $this->notes[$name] = $notes;
+                }
+                // Set required fields
+                $required = $this->element("required", $inputfield, false);
+                if(!in_array($name, $this->excludes["byNameRequired"]) && !in_array($type, $this->excludes["byTypeRequired"]) && $required) {
+                    $this->requiredFields[] = $name;
+                }
+
                 if(!is_null($this->collapsed)) $inputfields[$key]["collapsed"] = $this->collapsed;
 
                 if($showIf = $this->element('showIf', $inputfield, '')) {
