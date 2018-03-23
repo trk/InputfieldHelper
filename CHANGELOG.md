@@ -1,5 +1,11 @@
 # Changelog
 
+### Updated
+
+- Set value if we have a value or if we have placeholder set value
+
+## v.0.0.9
+
 ### Added
 
 - `setExclude($name = "label|desctiption|notes|required|value", $value => array(), $type = "name|type")` function for set exclude value

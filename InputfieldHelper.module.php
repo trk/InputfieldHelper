@@ -283,7 +283,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 8,
+            "version" => 9,
             "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
@@ -721,13 +721,15 @@ class InputfieldHelper extends ModuleConfig implements Module {
                 $id = $this->element("id", $inputfield, $key);
                 $name = $this->element("name", $inputfield, $key);
                 $value = $this->element($key, $this->values, $this->element("value", $inputfield, ""));
+                $attr = $this->element("attr", $inputfield, array());
+                $placeholder = $this->element("placeholder", $attr, "");
 
                 $id = $this->id_prefix . $id . $this->id_suffix;
                 $name = $this->name_prefix . $name . $this->name_suffix;
 
                 $inputfields[$key]["id"] = $id;
                 $inputfields[$key]["name"] = $name;
-                $inputfields[$key]["value"] = $value;
+                if($value || $placeholder) $inputfields[$key]["value"] = $value;
 
                 $type = $this->element("type", $inputfield, "");
 
