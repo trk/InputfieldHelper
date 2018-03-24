@@ -1,5 +1,12 @@
 # Changelog
 
+### Added
+
+- Set values (for get and post methods)
+- `sanitizer` option for input field options
+
+## v.0.1.0
+
 ### Updated
 
 - Set value if we have a value or if we have placeholder set value

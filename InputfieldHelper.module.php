@@ -283,7 +283,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 9,
+            "version" => 10,
             "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
@@ -718,25 +718,37 @@ class InputfieldHelper extends ModuleConfig implements Module {
             foreach ($inputfields as $key => $inputfield) {
                 $children = $this->element("children", $inputfield, array());
 
+                $type = $this->element("type", $inputfield, "");
                 $id = $this->element("id", $inputfield, $key);
                 $name = $this->element("name", $inputfield, $key);
                 $value = $this->element($key, $this->values, $this->element("value", $inputfield, ""));
-                $attr = $this->element("attr", $inputfield, array());
-                $placeholder = $this->element("placeholder", $attr, "");
+                $sanitizer = $this->element("sanitizer", $inputfield, "text");
+                $excludeValue = !in_array($name, $this->excludes["byNameValue"]) && !in_array($type, $this->excludes["byTypeValue"]) ? true : false;
+
+                // Check for post and get methods for set value for input field
+                if($this->wrapper instanceof InputfieldForm && $excludeValue === true) {
+                    if(strtoupper($this->wrapper->method) == "POST") {
+                        $value = $this->wire("sanitizer")->{$sanitizer}($this->wire("input")->post($key));
+                    }
+                    if(strtoupper($this->wrapper->method) == "GET") {
+                        $value = $this->wire("sanitizer")->{$sanitizer}($this->wire("input")->get($key));
+                    }
+                }
 
                 $id = $this->id_prefix . $id . $this->id_suffix;
                 $name = $this->name_prefix . $name . $this->name_suffix;
 
                 $inputfields[$key]["id"] = $id;
                 $inputfields[$key]["name"] = $name;
-                if($value || $placeholder) $inputfields[$key]["value"] = $value;
-
-                $type = $this->element("type", $inputfield, "");
 
                 // Set values
-                if(!in_array($name, $this->excludes["byNameValue"]) && !in_array($type, $this->excludes["byTypeValue"])) {
+                if($excludeValue === true) {
                     $this->inputfieldValues[$name] = $value;
                 }
+
+                // Set input filed value
+                $inputfields[$key]["value"] = $value;
+
                 // Set labels
                 $label = $this->element("label", $inputfield, "");
                 if(!in_array($name, $this->excludes["byNameLabel"]) && !in_array($type, $this->excludes["byTypeLabel"])) {
