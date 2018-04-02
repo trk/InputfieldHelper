@@ -1,5 +1,22 @@
 # Changelog
 
+### Changed
+
+- `protected $frameworks` now it store frameworks options with breakpoint
+
+### Renamed
+
+- `inputfield::options::_markup` to `inputfield::options::markup`
+
+### Removed
+
+- `inputfield::options::markup`
+- `inputfield::options::classes`
+- `protected $uikitOptions`
+- `public $frameworkBreakpoint`
+
+## v.0.1.1
+
 ### Added
 
 - Set values (for get and post methods)

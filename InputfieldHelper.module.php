@@ -120,10 +120,8 @@ class InputfieldHelper extends ModuleConfig implements Module {
      * @var array
      */
     protected $inputfield = array(
-        "markup" => array(),
-        "classes" => array(),
         // Inputfield based markup, this will surround rendered input after prepend and append values attached.
-        "_markup" => "{out}",
+        "markup" => "{out}",
         "append" => "",
         "prepend" => ""
     );
@@ -136,43 +134,44 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public $framework = "uikit3";
 
     /**
-     * Breakpoint for Front-end framework
-     *
-     * @var string
-     */
-    public $frameworkBreakpoint = "@m";
-
-    /**
-     * Uikit Options
-     *
-     * @var array
-     */
-    protected $uikitOptions = array(
-        "resetMarkup" => true,
-        "resetClasses" => true,
-        "classes" => array(
-            "list" => "uk-grid",
-            "item_label" => "uk-form-label",
-            "InputfieldSubmit" => array(
-                "item" => "uk-margin"
-            )
-        ),
-        "markup" => array(
-            "list" => '<div {attrs}>{out}</div>',
-            "item" => '<div {attrs}><div class="uk-form-controls">{out}</div></div>',
-            "item_label" => '<label class="{class}" for="{for}">{out}</label>',
-            "item_error" => ' <span class="uk-text-danger uk-text-small">{out}</span>',
-        )
-    );
-
-    /**
-     * Front-end Frameworks
+     * Front-end frameworks
      *
      * @var array
      */
     protected $frameworks = array(
-        "uikit2" => array(),
-        "uikit3" => array()
+        "uikit2" => array(
+            "resetMarkup" => true,
+            "resetClasses" => true,
+            "breakpoint" => "medium-",
+            "classes" => array(
+                "list" => "uk-grid",
+                "item_label" => "uk-form-label",
+                "InputfieldSubmit" => array(
+                    "item" => "uk-margin"
+                )
+            ),
+            "markup" => array(
+                "list" => '<div {attrs}>{out}</div>',
+                "item" => '<div {attrs}><div class="uk-form-controls">{out}</div></div>',
+                "item_label" => '<label class="{class}" for="{for}">{out}</label>',
+                "item_error" => ' <span class="uk-text-danger uk-text-small">{out}</span>',
+            )
+        ),
+        "uikit3" => array(
+            "resetMarkup" => true,
+            "resetClasses" => true,
+            "breakpoint" => "@m",
+            "classes" => array(
+                "list" => "uk-grid",
+                "item_label" => "uk-form-label"
+            ),
+            "markup" => array(
+                "list" => '<div {attrs}>{out}</div>',
+                "item" => '<div {attrs}><div class="uk-form-controls">{out}</div></div>',
+                "item_label" => '<label class="{class}" for="{for}">{out}</label>',
+                "item_error" => ' <span class="uk-text-danger uk-text-small">{out}</span>',
+            )
+        )
     );
 
     /**
@@ -283,7 +282,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
     public static function getModuleInfo() {
         return array(
             "title" => "InputfieldHelper",
-            "version" => 10,
+            "version" => 11,
             "summary" => __("This module extends base `ModuleConfig` class add some features to this class."),
             "href" => "https://github.com/trk/InputfieldHelper",
             "author" => "İskender TOTOĞLU | @ukyo(community), @trk (Github), https://www.altivebir.com",
@@ -355,24 +354,6 @@ class InputfieldHelper extends ModuleConfig implements Module {
 
     // ------------------------------------------------------------------------
 
-    /**
-     * Check framework is Uikit and return version, else return false
-     *
-     * @return bool|int
-     */
-    protected function isUikit() {
-        if($this->framework == "uikit2" || $this->framework == "uikit3") {
-            if($this->framework == "uikit2") {
-                return 2;
-            } else {
-                return 3;
-            }
-        }
-        return false;
-    }
-
-    // ------------------------------------------------------------------------
-
 
     public function ___prepareInputfields() {
         $this->wire("config")->inputfieldWrapper = array(
@@ -381,47 +362,37 @@ class InputfieldHelper extends ModuleConfig implements Module {
         $this->addHookBefore('InputfieldWrapper::render', function($event) {
             $inputfieldWrapper = $event->object;
             $inputfieldWrapper->useColumnWidth = false;
-            $framework = $this->element($this->framework, $this->frameworks, array());
 
-            // Replace Uikit Framework defaults
-            if($this->isUikit()) {
-                $framework = $this->uikitOptions;
-            }
+            // Get front-end framework
+            if($this->framework && is_array($this->framework)) $framework = $this->framework;
+            else $framework = $this->element($this->framework, $this->frameworks, array());
 
-            // Set framework defaults
-            if(count($framework)) {
-                foreach ($framework as $k => $v) {
-                    if($k == "markup" && count($this->markup) || $k == "classes" && count($this->classes)) {
-                        // don nothing
-                    } else {
-                        $this->$k = $v;
-                    }
-                }
-            }
+            // Set framework options
+            $markup = array_merge($this->markup, $this->element("markup", $framework, array()));
+            $classes = array_merge($this->classes, $this->element("classes", $framework, array()));
+            $breakpoint = $this->element("breakpoint", $framework, "");
+            $resetMarkup = $this->element("resetMarkup", $framework, $this->resetMarkup);
+            $resetClasses = $this->element("resetClasses", $framework, $this->resetClasses);
 
             // Clean markup and classes
-            if($this->resetMarkup) $inputfieldWrapper->setMarkup($this->cleanMarkup);
-            if($this->resetClasses) $inputfieldWrapper->setClasses($this->cleanClasses);
+            if($resetMarkup) $inputfieldWrapper->setMarkup($this->cleanMarkup);
+            if($resetClasses) $inputfieldWrapper->setClasses($this->cleanClasses);
 
             // Get markup and classes
             $markupWrapper = $inputfieldWrapper->getMarkup();
-            $classesWrapper = $inputfieldWrapper->getClasses();
+            $markupWrapper = array_merge($markupWrapper, $markup);
+            $inputfieldWrapper->setMarkup($markupWrapper);
 
-            // Set markup and classes
-            if(is_array($this->markup) && count($this->markup)) {
-                $markupWrapper = array_merge($markupWrapper, $this->markup);
-                $inputfieldWrapper->setMarkup($markupWrapper);
-            }
-            if(is_array($this->classes) && count($this->classes)) {
-                $classesWrapper = array_merge($classesWrapper, $this->classes);
-                $inputfieldWrapper->setClasses($classesWrapper);
-            }
+            $classesWrapper = $inputfieldWrapper->getClasses();
+            $classesWrapper = array_merge($classesWrapper, $classes);
+            $inputfieldWrapper->setClasses($classesWrapper);
 
             foreach ($inputfieldWrapper->children as $inputfield) {
                 $name = $inputfield->name;
                 // Get inputfield
                 $inputfieldArray = $this->element($name, $this->inputfieldsArray, array());
-                $inputfieldMarkup = $this->element("_markup", $inputfieldArray, $this->inputfield["_markup"]);
+                $inputfieldMarkup = $this->element("markup", $inputfieldArray, $this->inputfield["markup"]);
+
                 $addons = array(
                     "append" => $this->element("append", $inputfieldArray, ""),
                     "prepend" => $this->element("prepend", $inputfieldArray, ""),
@@ -431,25 +402,8 @@ class InputfieldHelper extends ModuleConfig implements Module {
                     "iconClickable" => $this->element("iconClickable", $inputfieldArray)
                 );
 
-                $markup = $this->element("markup", $inputfieldArray, array());
-                $classes = $this->element("classes", $inputfieldArray, array());
-
-                // Field name based markup
-                if(count($markup)) {
-                    $inputfieldMarkup = array_merge($markupWrapper, $markup);
-                    $inputfieldWrapper->setMarkup($inputfieldMarkup);
-                } else {
-                    $inputfieldWrapper->setMarkup($markupWrapper);
-                }
-                // Field name based classes
-                if(count($classes)) {
-                    $inputfieldClasses = array_merge($classesWrapper, $classes);
-                    $inputfieldWrapper->setClasses($inputfieldClasses);
-                } else {
-                    $inputfieldWrapper->setClasses($classesWrapper);
-                }
                 if(count($framework)) {
-                    if($this->isUikit() === 2 || $this->isUikit() === 3) {
+                    if($this->framework == "uikit2" || $this->framework == "uikit3") {
                         if($inputfield instanceof InputfieldTextarea) {
                             $inputfield->addClass('uk-textarea');
                         } else if($inputfield instanceof InputfieldSelect) {
@@ -469,13 +423,13 @@ class InputfieldHelper extends ModuleConfig implements Module {
                         }
                     }
 
-                    if($this->isUikit() && $inputfield instanceof InputfieldHidden) {
+                    if(($this->framework == "uikit2" || $this->framework == "uikit3") && $inputfield instanceof InputfieldHidden) {
                         $inputfield->wrapAttr('class', 'uk-hidden');
                     } else {
-                        if($this->isUikit() === 2) {
-                            $inputfield->wrapAttr('class', $this->frameworkUikit2($inputfield->columnWidth));
-                        } elseif($this->isUikit() === 3) {
-                            $inputfield->wrapAttr('class', $this->frameworkUikit3($inputfield->columnWidth));
+                        if($this->framework == "uikit2") {
+                            $inputfield->wrapAttr('class', $this->frameworkUikit2($inputfield->columnWidth, $breakpoint));
+                        } elseif($this->framework == "uikit3") {
+                            $inputfield->wrapAttr('class', $this->frameworkUikit3($inputfield->columnWidth, $breakpoint));
                         }
                     }
                 }
@@ -486,7 +440,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
 
                     $icon = "";
                     $hasIcon = false;
-                    if($addons["icon"] && $this->isUikit() === 3) $hasIcon = true;
+                    if($addons["icon"] && $this->framework == "uikit3") $hasIcon = true;
                     if ($hasIcon) {
                         $iconTag = "span";
                         $iconHref = "";
@@ -510,7 +464,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
                             $return .= '</div>';
                         }
                     }
-                    $inputfieldEvent->return = str_replace($this->inputfield["_markup"], $return, $inputfieldMarkup);
+                    $inputfieldEvent->return = str_replace($this->inputfield["markup"], $return, $inputfieldMarkup);
                 });
             }
         });
@@ -524,7 +478,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
      * @param string $columnWidth
      * @return string
      */
-    protected function frameworkUikit2($columnWidth="") {
+    protected function frameworkUikit2($columnWidth = "", $breakpoint = "medium-") {
         $width = "";
         $class = "uk-width-1-1";
         if($columnWidth != "") {
@@ -550,7 +504,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
                 $width = 10;
             }
             if($width == 10) $class = "uk-width-1-1";
-            else $class = "uk-width-{$this->frameworkBreakpoint}{$width}-10";
+            else $class = "uk-width-{$breakpoint}{$width}-10";
         }
         return $class;
     }
@@ -563,23 +517,17 @@ class InputfieldHelper extends ModuleConfig implements Module {
      * @param string $columnWidth
      * @return string
      */
-    protected function frameworkUikit3($columnWidth = "") {
+    protected function frameworkUikit3($columnWidth = "", $breakpoint = "@m") {
         $ukWidthClass = '1-1';
         // determine column width class
         // uk class => width %
         $ukGridWidths = array(
+            "100%" => "1-1",
+            "83%" => "5-6",
             "80%" => "4-5",
-            "75%" => "3-4",
-            "70%" => "2-3",
-            "64%" => "2-3",
             "60%" => "3-5",
             "50%" => "1-2",
-            "45%" => "1-2",
-            "40%" => "2-5",
-            "34%" => "1-3",
             "33%" => "1-3",
-            "32%" => "2-6",
-            "30%" => "1-3",
             "25%" => "1-4",
             "20%" => "1-5",
             "16%" => "1-6"
@@ -596,7 +544,7 @@ class InputfieldHelper extends ModuleConfig implements Module {
             }
         }
 
-        return "uk-width-" . $ukWidthClass . $this->frameworkBreakpoint;
+        return "uk-width-" . $ukWidthClass . $breakpoint;
     }
 
     // ------------------------------------------------------------------------
